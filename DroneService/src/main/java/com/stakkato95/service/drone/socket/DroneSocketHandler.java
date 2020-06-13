@@ -3,7 +3,7 @@ package com.stakkato95.service.drone.socket;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stakkato95.service.drone.model.DroneInfo;
+import com.stakkato95.service.drone.transport.model.DroneInfo;
 import com.stakkato95.service.drone.model.UnregisteredDrone;
 import com.stakkato95.service.drone.transport.Message;
 import com.stakkato95.service.drone.transport.MessageTemp;
