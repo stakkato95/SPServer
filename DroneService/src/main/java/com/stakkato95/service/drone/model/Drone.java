@@ -9,7 +9,7 @@ import java.util.Date;
 public class Drone {
     @Id
     public String id;
-    public String lastIp;
+    public String ip;
     public String name;
     public Date showUpTime;
     public Date registrationTime;
