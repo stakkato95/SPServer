@@ -1,4 +1,4 @@
-package com.stakkato95.service.drone.transport.model;
+package com.stakkato95.service.drone.socket.transport.model;
 
 import com.stakkato95.service.drone.model.Position;
 

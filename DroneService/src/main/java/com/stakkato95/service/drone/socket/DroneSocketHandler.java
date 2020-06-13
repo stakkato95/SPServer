@@ -1,13 +1,13 @@
 package com.stakkato95.service.drone.socket;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stakkato95.service.drone.transport.model.DroneInfo;
+import com.stakkato95.service.drone.socket.transport.model.DroneInfo;
 import com.stakkato95.service.drone.model.UnregisteredDrone;
-import com.stakkato95.service.drone.transport.Message;
-import com.stakkato95.service.drone.transport.MessageTemp;
-import com.stakkato95.service.drone.transport.MessageType;
+import com.stakkato95.service.drone.socket.transport.Message;
+import com.stakkato95.service.drone.socket.transport.MessageTemp;
+import com.stakkato95.service.drone.socket.transport.MessageType;
+import com.stakkato95.service.drone.socket.transport.model.Registration;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -16,6 +16,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DroneSocketHandler extends TextWebSocketHandler {
@@ -24,25 +25,19 @@ public class DroneSocketHandler extends TextWebSocketHandler {
     private final ObjectMapper objectMapper;
     private final MongoTemplate mongoTemplate;
 
-    public DroneSocketHandler(MongoTemplate mongoTemplate) {
+    public DroneSocketHandler(MongoTemplate mongoTemplate, ObjectMapper objectMapper) {
         this.mongoTemplate = mongoTemplate;
-
+        this.objectMapper = objectMapper;
         sessions = new ArrayList<>();
-        objectMapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false)
-                .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
-                .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, false)
-                .configure(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false)
-                .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
-                .configure(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY, false)
-                .configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, false)
-                .configure(DeserializationFeature.FAIL_ON_UNRESOLVED_OBJECT_IDS, false);
     }
 
-    public void sendMessage(String message) throws IOException {
-        sessions.get(0).sendMessage(new TextMessage(message));
+    public <T> void sendMessage(T payload, MessageType type) throws IOException {
+        Message<T> message = new Message<>();
+        message.messageType = type;
+        message.payload = payload;
+
+        String json = objectMapper.writeValueAsString(message);
+        sessions.get(0).sendMessage(new TextMessage(json));
     }
 
     @Override
@@ -63,7 +58,10 @@ public class DroneSocketHandler extends TextWebSocketHandler {
             UnregisteredDrone info = new UnregisteredDrone();
             info.ip = m.payload.ip;
             info.position = m.payload.position;
+            info.showUpTime = new Date();
             mongoTemplate.save(info);
+
+            session.sendMessage(message);
         }
     }
 
