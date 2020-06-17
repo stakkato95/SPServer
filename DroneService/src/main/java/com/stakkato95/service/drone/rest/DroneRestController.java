@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/drone")
 public class DroneRestController {
@@ -57,7 +58,9 @@ public class DroneRestController {
         drone.ip = unregistered.ip;
         drone.showUpTime = unregistered.showUpTime;
         drone.name = registration.name;
-        drone.registrationTime = new Date();
+        Date registrationTime = new Date();
+        drone.registrationTime = registrationTime;
+        drone.lastSeenTime = registrationTime;
         drone.lastConnectionTime = unregistered.showUpTime;
         drone = mongoTemplate.save(drone);
 

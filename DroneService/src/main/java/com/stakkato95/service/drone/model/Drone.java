@@ -14,4 +14,5 @@ public class Drone {
     public Date showUpTime;
     public Date registrationTime;
     public Date lastConnectionTime;
+    public Date lastSeenTime;
 }
