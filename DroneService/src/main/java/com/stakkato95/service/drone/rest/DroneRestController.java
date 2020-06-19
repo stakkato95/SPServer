@@ -44,7 +44,9 @@ public class DroneRestController {
     }
 
     @PostMapping(value = "/registerNew", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public RestResponse<Drone> registerNew(@RequestBody RegistrationRequest registration) {
+    public RestResponse<Drone> registerNew(@RequestBody RegistrationRequest registration) throws InterruptedException {
+        Thread.sleep(2000);
+
         RestResponse<Drone> response = new RestResponse<>();
 
         UnregisteredDrone unregistered = mongoTemplate.findById(registration.unregisteredId, UnregisteredDrone.class);
@@ -64,15 +66,16 @@ public class DroneRestController {
         drone.lastConnectionTime = unregistered.showUpTime;
         drone = mongoTemplate.save(drone);
 
-        try {
-            Registration reg = new Registration();
-            reg.id = drone.id;
-            droneSocketHandler.sendMessage(reg, MessageType.REGISTRATION);
-        } catch (Exception e) {
-            response.successful = false;
-            response.message = String.format("Exception: '%s'", e.getMessage());
-            return response;
-        }
+        //TODO uncomment
+//        try {
+//            Registration reg = new Registration();
+//            reg.id = drone.id;
+//            droneSocketHandler.sendMessage(reg, MessageType.REGISTRATION);
+//        } catch (Exception e) {
+//            response.successful = false;
+//            response.message = String.format("Exception: '%s'", e.getMessage());
+//            return response;
+//        }
 
         mongoTemplate.remove(
                 Query.query(Criteria.where("id").is(registration.unregisteredId)),
