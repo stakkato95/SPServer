@@ -2,12 +2,12 @@ package com.stakkato95.service.drone.socket;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stakkato95.service.drone.socket.transport.model.DroneInfo;
-import com.stakkato95.service.drone.model.UnregisteredDrone;
+import com.stakkato95.service.drone.socket.transport.model.response.DroneInfo;
+import com.stakkato95.service.drone.model.drone.UnregisteredDrone;
 import com.stakkato95.service.drone.socket.transport.Message;
 import com.stakkato95.service.drone.socket.transport.MessageTemp;
 import com.stakkato95.service.drone.socket.transport.MessageType;
-import com.stakkato95.service.drone.socket.transport.model.Registration;
+import com.stakkato95.service.drone.socket.transport.model.response.StartSessionAck;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -15,20 +15,22 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class DroneSocketHandler extends TextWebSocketHandler {
 
-    private List<WebSocketSession> sessions;
     private final ObjectMapper objectMapper;
     private final MongoTemplate mongoTemplate;
+    private List<WebSocketSession> sessions;
+    private Map<MessageType, SocketMessageConsumer> handlers;
 
     public DroneSocketHandler(MongoTemplate mongoTemplate, ObjectMapper objectMapper) {
         this.mongoTemplate = mongoTemplate;
         this.objectMapper = objectMapper;
+
         sessions = new ArrayList<>();
+        handlers = new HashMap<>();
+        initHandlers();
     }
 
     public <T> void sendMessage(T payload, MessageType type) throws IOException {
@@ -52,16 +54,12 @@ public class DroneSocketHandler extends TextWebSocketHandler {
         System.out.println(message.getPayload());
 
         MessageTemp mTemp = objectMapper.readValue(message.getPayload(), MessageTemp.class);
-        if (mTemp.messageType == MessageType.SHOW_UP) {
-            Message<DroneInfo> m = objectMapper.readValue(message.getPayload(), new TypeReference<>() { });
 
-            UnregisteredDrone info = new UnregisteredDrone();
-            info.ip = m.payload.ip;
-            info.position = m.payload.position;
-            info.showUpTime = new Date();
-            mongoTemplate.save(info);
-
-            session.sendMessage(message);
+        SocketMessageConsumer consumer = handlers.get(mTemp.messageType);
+        if (consumer != null) {
+            consumer.consume(session, message.getPayload());
+        } else {
+            throw new Exception(String.format("no consumer for message with type '%s'", mTemp.messageType));
         }
     }
 
@@ -69,5 +67,27 @@ public class DroneSocketHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         super.afterConnectionClosed(session, status);
         this.sessions.remove(session);
+    }
+
+    private void initHandlers() {
+        handlers.put(MessageType.SHOW_UP, this::onShowUp);
+        handlers.put(MessageType.START_SESSION_ACK, this::onStartSessionAck);
+    }
+
+    private void onShowUp(WebSocketSession session, String payload) throws Exception {
+        Message<DroneInfo> m = objectMapper.readValue(payload, new TypeReference<>() { });
+
+        UnregisteredDrone info = new UnregisteredDrone();
+        info.ip = m.payload.ip;
+        info.position = m.payload.position;
+        info.showUpTime = new Date();
+        mongoTemplate.save(info);
+
+        sendMessage(payload, MessageType.SHOW_UP);
+    }
+
+    private void onStartSessionAck(WebSocketSession session, String payload) throws Exception {
+        Message<StartSessionAck> m = objectMapper.readValue(payload, new TypeReference<>() { });
+        System.out.println(m.payload.successful);
     }
 }

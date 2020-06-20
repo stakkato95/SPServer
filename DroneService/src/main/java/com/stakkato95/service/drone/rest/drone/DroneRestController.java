@@ -1,12 +1,10 @@
-package com.stakkato95.service.drone.rest;
+package com.stakkato95.service.drone.rest.drone;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stakkato95.service.drone.model.Drone;
-import com.stakkato95.service.drone.model.UnregisteredDrone;
-import com.stakkato95.service.drone.rest.model.RegistrationRequest;
+import com.stakkato95.service.drone.model.drone.Drone;
+import com.stakkato95.service.drone.model.drone.UnregisteredDrone;
+import com.stakkato95.service.drone.rest.drone.model.RegistrationRequest;
 import com.stakkato95.service.drone.socket.DroneSocketHandler;
-import com.stakkato95.service.drone.socket.transport.MessageType;
-import com.stakkato95.service.drone.socket.transport.model.Registration;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;

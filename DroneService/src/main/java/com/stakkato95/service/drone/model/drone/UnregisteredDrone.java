@@ -1,5 +1,6 @@
-package com.stakkato95.service.drone.model;
+package com.stakkato95.service.drone.model.drone;
 
+import com.stakkato95.service.drone.model.common.Position;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 

@@ -1,4 +1,4 @@
-package com.stakkato95.service.drone.model;
+package com.stakkato95.service.drone.model.common;
 
 public class Position {
     public float lat;

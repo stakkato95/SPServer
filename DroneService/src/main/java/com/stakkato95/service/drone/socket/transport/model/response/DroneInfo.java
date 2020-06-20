@@ -1,6 +1,6 @@
 package com.stakkato95.service.drone.socket.transport.model;
 
-import com.stakkato95.service.drone.model.Position;
+import com.stakkato95.service.drone.model.common.Position;
 
 public class DroneInfo {
     public String ip;
