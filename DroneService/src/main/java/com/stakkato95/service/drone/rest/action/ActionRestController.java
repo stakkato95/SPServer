@@ -19,7 +19,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*")
+@CrossOrigin
 @RestController
 @RequestMapping("/api/action")
 public class ActionRestController {
@@ -64,10 +64,10 @@ public class ActionRestController {
         return response;
     }
 
-    @GetMapping(value = "/getAllRunning", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public RestResponse<List<Action>> getAllRunning(@RequestBody AllActionsRequest request) {
+    @GetMapping(value = "/getAllRunning/{sessionId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public RestResponse<List<Action>> getAllRunning(@PathVariable String sessionId) {
         boolean sessionExists = mongoTemplate.exists(
-                Query.query(Criteria.where("id").is(request.sessionId)),
+                Query.query(Criteria.where("id").is(sessionId)),
                 Session.class
         );
 
@@ -75,12 +75,12 @@ public class ActionRestController {
 
         if (!sessionExists) {
             response.successful = false;
-            response.message = String.format("session with id '%s' doesn't exist", request.sessionId);
+            response.message = String.format("session with id '%s' doesn't exist", sessionId);
             return response;
         }
 
         List<Action> actions = mongoTemplate.find(
-                Query.query(Criteria.where("sessionId").is(request.sessionId)),
+                Query.query(Criteria.where("sessionId").is(sessionId)),
                 Action.class
         );
 
@@ -92,5 +92,10 @@ public class ActionRestController {
     @GetMapping(value = "/getUpdates", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ChangeStreamEvent<Action>> getUpdates() {
         return reactiveMongoTemplate.changeStream(Action.class).listen();
+    }
+
+    @GetMapping(value = "/test")
+    public String test() {
+        return "hello";
     }
 }

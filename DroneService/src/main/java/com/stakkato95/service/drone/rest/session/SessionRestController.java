@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.Date;
 
-@CrossOrigin(origins = "*")
+@CrossOrigin
 @RestController
 @RequestMapping("/api/session")
 public class SessionRestController {
@@ -35,7 +35,7 @@ public class SessionRestController {
     }
 
     @PostMapping(value = "/startSession", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public RestResponse<StartSessionResponse> startSession(@RequestBody StartSessionRequest request) {
+    public RestResponse<StartSessionResponse> startSession(@RequestBody(required = false) StartSessionRequest request) {
         Session session = new Session();
         session.droneId = request.droneId;
         session.flightState = FlightState.LANDED;
