@@ -3,6 +3,7 @@ package com.stakkato95.service.drone.rest.drone;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stakkato95.service.drone.model.drone.Drone;
 import com.stakkato95.service.drone.model.drone.UnregisteredDrone;
+import com.stakkato95.service.drone.rest.RestResponse;
 import com.stakkato95.service.drone.rest.drone.model.RegistrationRequest;
 import com.stakkato95.service.drone.socket.DroneSocketHandler;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -79,6 +80,22 @@ public class DroneRestController {
                 Query.query(Criteria.where("id").is(registration.unregisteredId)),
                 UnregisteredDrone.class
         );
+
+        response.successful = true;
+        response.payload = drone;
+        return response;
+    }
+
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public RestResponse<Drone> getDrone(@PathVariable String id) {
+        Drone drone = mongoTemplate.findById(id, Drone.class);
+
+        RestResponse<Drone> response = new RestResponse<>();
+        if (drone == null) {
+            response.successful = false;
+            response.message = String.format("no drone with id '%s'", id);
+            return response;
+        }
 
         response.successful = true;
         response.payload = drone;

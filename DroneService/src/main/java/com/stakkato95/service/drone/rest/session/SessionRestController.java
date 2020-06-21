@@ -3,6 +3,7 @@ package com.stakkato95.service.drone.rest.session;
 import com.stakkato95.service.drone.model.session.FlightState;
 import com.stakkato95.service.drone.model.session.Session;
 import com.stakkato95.service.drone.model.session.SessionState;
+import com.stakkato95.service.drone.rest.RestResponse;
 import com.stakkato95.service.drone.rest.session.model.request.SessionRequest;
 import com.stakkato95.service.drone.rest.session.model.request.StartSessionRequest;
 import com.stakkato95.service.drone.rest.session.model.request.StopSessionRequest;
@@ -57,6 +58,8 @@ public class SessionRestController {
         startSessionResponse.droneId = session.droneId;
         startSessionResponse.sessionId = session.id;
         startSessionResponse.sessionStartTime = session.sessionStartTime;
+        startSessionResponse.sessionState = session.sessionState;
+        startSessionResponse.flightState = session.flightState;
 
         RestResponse<StartSessionResponse> response = new RestResponse<>();
         response.successful = true;
@@ -109,6 +112,26 @@ public class SessionRestController {
         response.successful = true;
         response.payload = populateSessionResponse(session);
         ;
+        return response;
+    }
+
+    @GetMapping(value = "/getRunning", produces = MediaType.APPLICATION_JSON_VALUE)
+    public RestResponse<Session> getRunning() {
+        Session session = mongoTemplate.findOne(
+                Query.query(Criteria.where("sessionState").is("RUNNING")),
+                Session.class
+        );
+
+        RestResponse<Session> response = new RestResponse<>();
+
+        if (session == null) {
+            response.successful = false;
+            response.message = "no running sessions";
+            return response;
+        }
+
+        response.successful = true;
+        response.payload = session;
         return response;
     }
 

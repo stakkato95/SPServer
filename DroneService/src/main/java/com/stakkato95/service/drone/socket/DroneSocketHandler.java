@@ -82,12 +82,10 @@ public class DroneSocketHandler extends TextWebSocketHandler {
         info.position = m.payload.position;
         info.showUpTime = new Date();
         mongoTemplate.save(info);
-
-        sendMessage(payload, MessageType.SHOW_UP);
     }
 
     private void onStartSessionAck(WebSocketSession session, String payload) throws Exception {
         Message<StartSessionAck> m = objectMapper.readValue(payload, new TypeReference<>() { });
-        System.out.println(m.payload.successful);
+        System.out.printf("ACK %b\n", m.payload.successful);
     }
 }
