@@ -1,6 +1,6 @@
 package com.stakkato95.service.drone.socket;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.stakkato95.service.drone.model.action.ActionType;
 import com.stakkato95.service.drone.model.drone.Drone;
 import com.stakkato95.service.drone.model.drone.UnregisteredDrone;
 import com.stakkato95.service.drone.socket.transport.MessageType;
@@ -55,7 +55,6 @@ public class DroneConnection implements SocketConnectionResponder {
         mongoTemplate.save(drone);
     }
 
-    @Override
     public void sendPing() {
         Ping ping = new Ping();
         ping.timestamp = new Date();
@@ -65,5 +64,9 @@ public class DroneConnection implements SocketConnectionResponder {
         } catch (IOException e) {
             LOGGER.error("Error when sending ping", e);
         }
+    }
+
+    public void sendAction(ActionType actionType, float value) {
+        //TODO
     }
 }

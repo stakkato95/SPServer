@@ -4,7 +4,6 @@ import com.stakkato95.service.drone.socket.transport.model.response.DroneInfo;
 import com.stakkato95.service.drone.socket.transport.model.response.PingAck;
 import com.stakkato95.service.drone.socket.transport.model.response.StartSessionAck;
 
-import java.io.IOException;
 
 public interface SocketConnectionResponder {
 
@@ -13,6 +12,4 @@ public interface SocketConnectionResponder {
     void onStartSessionAck(StartSessionAck sessionAck);
 
     void onPingAck(PingAck pingAck);
-
-    void sendPing() throws IOException;
 }
