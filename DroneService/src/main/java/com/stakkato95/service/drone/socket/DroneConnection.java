@@ -1,10 +1,14 @@
 package com.stakkato95.service.drone.socket;
 
+import com.stakkato95.service.drone.model.action.Action;
+import com.stakkato95.service.drone.model.action.ActionState;
 import com.stakkato95.service.drone.model.action.ActionType;
 import com.stakkato95.service.drone.model.drone.Drone;
 import com.stakkato95.service.drone.model.drone.UnregisteredDrone;
 import com.stakkato95.service.drone.socket.transport.MessageType;
+import com.stakkato95.service.drone.socket.transport.model.request.StartAction;
 import com.stakkato95.service.drone.socket.transport.model.request.Ping;
+import com.stakkato95.service.drone.socket.transport.model.response.ActionFinished;
 import com.stakkato95.service.drone.socket.transport.model.response.DroneInfo;
 import com.stakkato95.service.drone.socket.transport.model.response.PingAck;
 import com.stakkato95.service.drone.socket.transport.model.response.StartSessionAck;
@@ -24,7 +28,7 @@ public class DroneConnection implements SocketConnectionResponder {
 
     public DroneConnection(DroneSocketHandler socketHandler, MongoTemplate mongoTemplate) {
         this.socketHandler = socketHandler;
-        this.socketHandler.setConnectionResponder(this);
+        this.socketHandler.setResponder(this);
 
         this.mongoTemplate = mongoTemplate;
     }
@@ -55,18 +59,38 @@ public class DroneConnection implements SocketConnectionResponder {
         mongoTemplate.save(drone);
     }
 
+    @Override
+    public void onActionFinished(ActionFinished actionFinished) {
+        Action action = mongoTemplate.findById(actionFinished.actionId, Action.class);
+
+        if (action == null) {
+            LOGGER.error("Unknown action has finished");
+            return;
+        }
+
+        action.actionState = ActionState.FINISHED;
+        mongoTemplate.save(action);
+    }
+
     public void sendPing() {
         Ping ping = new Ping();
         ping.timestamp = new Date();
-
-        try {
-            socketHandler.sendMessage(ping, MessageType.PING);
-        } catch (IOException e) {
-            LOGGER.error("Error when sending ping", e);
-        }
+        send(ping, MessageType.PING);
     }
 
-    public void sendAction(ActionType actionType, float value) {
-        //TODO
+    public void sendAction(String actionId, ActionType actionType, float value) {
+        StartAction startAction = new StartAction();
+        startAction.actionId = actionId;
+        startAction.actionType = actionType;
+        startAction.value = value;
+        send(startAction, MessageType.START_ACTION);
+    }
+
+    private <T> void send(T payload, MessageType messageType) {
+        try {
+            socketHandler.sendMessage(payload, messageType);
+        } catch (IOException e) {
+            LOGGER.error(String.format("Error when sending %s", messageType), e);
+        }
     }
 }

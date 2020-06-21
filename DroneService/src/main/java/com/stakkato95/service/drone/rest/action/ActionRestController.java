@@ -57,7 +57,7 @@ public class ActionRestController {
         action = mongoTemplate.save(action);
 
         //TODO implement logic with acknowledgements
-        droneConnection.sendAction(request.actionType, request.value);
+        droneConnection.sendAction(action.id, request.actionType, request.value);
 
         response.successful = true;
         response.payload = action;
@@ -88,7 +88,7 @@ public class ActionRestController {
         response.payload = actions;
         return response;
     }
-    
+
     @GetMapping(value = "/getUpdates", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ChangeStreamEvent<Action>> getUpdates() {
         return reactiveMongoTemplate.changeStream(Action.class).listen();

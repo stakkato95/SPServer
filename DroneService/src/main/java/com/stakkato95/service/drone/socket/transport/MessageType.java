@@ -10,5 +10,9 @@ public enum MessageType {
     PING,
     PING_ACK,
 
+    START_ACTION,
+    START_ACTION_ACK, //TODO future release
+    ACTION_FINISHED,
+
     STOP_SESSION
 }

@@ -1,17 +1,15 @@
 package com.stakkato95.service.drone.socket;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stakkato95.service.drone.socket.transport.Message;
 import com.stakkato95.service.drone.socket.transport.MessageTemp;
 import com.stakkato95.service.drone.socket.transport.MessageType;
+import com.stakkato95.service.drone.socket.transport.model.response.ActionFinished;
 import com.stakkato95.service.drone.socket.transport.model.response.DroneInfo;
 import com.stakkato95.service.drone.socket.transport.model.response.PingAck;
 import com.stakkato95.service.drone.socket.transport.model.response.StartSessionAck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -30,7 +28,7 @@ public class DroneSocketHandler extends TextWebSocketHandler {
     private final MongoTemplate mongoTemplate;
     private List<WebSocketSession> sessions;
     private Map<MessageType, SocketMessageConsumer> handlers;
-    private SocketConnectionResponder connectionResponder;
+    private SocketConnectionResponder responder;
 
     public DroneSocketHandler(MongoTemplate mongoTemplate, ObjectMapper objectMapper) {
         this.mongoTemplate = mongoTemplate;
@@ -41,8 +39,8 @@ public class DroneSocketHandler extends TextWebSocketHandler {
         initHandlers();
     }
 
-    void setConnectionResponder(SocketConnectionResponder connectionResponder) {
-        this.connectionResponder = connectionResponder;
+    void setResponder(SocketConnectionResponder responder) {
+        this.responder = responder;
     }
 
     public <T> void sendMessage(T payload, MessageType type) throws IOException {
@@ -86,21 +84,10 @@ public class DroneSocketHandler extends TextWebSocketHandler {
     }
 
     private void initHandlers() {
-        handlers.put(MessageType.SHOW_UP, this::onShowUp);
-        handlers.put(MessageType.START_SESSION_ACK, this::onStartSessionAck);
-        handlers.put(MessageType.PING_ACK, this::onPingAck);
-    }
-
-    private void onShowUp(WebSocketSession session, String payload) throws Exception {
-        callResponder(payload, connectionResponder::onShowUp, DroneInfo.class);
-    }
-
-    private void onStartSessionAck(WebSocketSession session, String payload) throws Exception {
-        callResponder(payload, connectionResponder::onStartSessionAck, StartSessionAck.class);
-    }
-
-    private void onPingAck(WebSocketSession session, String payload) throws Exception {
-        callResponder(payload, connectionResponder::onPingAck, PingAck.class);
+        handlers.put(MessageType.SHOW_UP, (s, p) -> callResponder(p, responder::onShowUp, DroneInfo.class));
+        handlers.put(MessageType.START_SESSION_ACK, (s, p) -> callResponder(p, responder::onStartSessionAck, StartSessionAck.class));
+        handlers.put(MessageType.PING_ACK, (s, p) -> callResponder(p, responder::onPingAck, PingAck.class));
+        handlers.put(MessageType.ACTION_FINISHED, (s, p) -> callResponder(p, responder::onActionFinished, ActionFinished.class));
     }
 
     private <T> void callResponder(String payload, Consumer<T> responderMethod, Class<T> contentClass) throws Exception {
@@ -109,7 +96,7 @@ public class DroneSocketHandler extends TextWebSocketHandler {
                 objectMapper.getTypeFactory().constructParametricType(Message.class, contentClass)
         );
 
-        if (connectionResponder != null) {
+        if (responder != null) {
             responderMethod.accept(m.payload);
         }
     }
