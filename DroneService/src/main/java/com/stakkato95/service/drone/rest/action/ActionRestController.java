@@ -7,6 +7,7 @@ import com.stakkato95.service.drone.rest.RestResponse;
 import com.stakkato95.service.drone.rest.action.model.request.AllActionsRequest;
 import com.stakkato95.service.drone.rest.action.model.request.StartActionRequest;
 import com.stakkato95.service.drone.socket.DroneConnection;
+import org.reactivestreams.Publisher;
 import org.springframework.data.mongodb.core.ChangeStreamEvent;
 import org.springframework.data.mongodb.core.ChangeStreamOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.function.Function;
 
 @CrossOrigin
 @RestController
@@ -90,8 +92,8 @@ public class ActionRestController {
     }
 
     @GetMapping(value = "/getUpdates", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ChangeStreamEvent<Action>> getUpdates() {
-        return reactiveMongoTemplate.changeStream(Action.class).listen();
+    public Flux<Action> getUpdates() {
+        return reactiveMongoTemplate.changeStream(Action.class).listen().map(ChangeStreamEvent::getBody);
     }
 
     @GetMapping(value = "/test")
