@@ -26,6 +26,9 @@ import java.util.function.Function;
 @RequestMapping("/api/action")
 public class ActionRestController {
 
+    private static final String DATABASE_NAME = "skynetz";
+    private static final String COLLECTION_TO_LISTEN = "action";
+
     private final MongoTemplate mongoTemplate;
     private final ReactiveMongoTemplate reactiveMongoTemplate;
     private final DroneConnection droneConnection;
@@ -93,7 +96,12 @@ public class ActionRestController {
 
     @GetMapping(value = "/getUpdates", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<Action> getUpdates() {
-        return reactiveMongoTemplate.changeStream(Action.class).listen().map(ChangeStreamEvent::getBody);
+        return reactiveMongoTemplate.changeStream(
+                DATABASE_NAME,
+                COLLECTION_TO_LISTEN,
+                ChangeStreamOptions.builder().build(),
+                Action.class
+        ).map(ChangeStreamEvent::getBody);
     }
 
     @GetMapping(value = "/test")
