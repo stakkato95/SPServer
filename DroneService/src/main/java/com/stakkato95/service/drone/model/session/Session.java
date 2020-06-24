@@ -11,6 +11,7 @@ import java.util.Date;
 public class Session {
     @Id
     public String id;
+    public String socketSessionId;
     public String droneId;
     public Date sessionStartTime;
     public Date sessionEndTime;

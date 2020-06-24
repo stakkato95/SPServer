@@ -1,4 +1,4 @@
-package com.stakkato95.service.drone.rest.drone.model;
+package com.stakkato95.service.drone.domain.drone.model;
 
 public class RegistrationRequest {
     public String unregisteredId;

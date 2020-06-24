@@ -1,4 +1,4 @@
-package com.stakkato95.service.drone.rest;
+package com.stakkato95.service.drone.domain;
 
 public class RestResponse<T> {
     public boolean successful;

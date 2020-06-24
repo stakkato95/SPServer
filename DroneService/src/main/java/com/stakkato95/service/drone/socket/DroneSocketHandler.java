@@ -1,20 +1,21 @@
 package com.stakkato95.service.drone.socket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stakkato95.service.drone.helper.PublishSubject;
 import com.stakkato95.service.drone.socket.transport.Message;
 import com.stakkato95.service.drone.socket.transport.MessageTemp;
 import com.stakkato95.service.drone.socket.transport.MessageType;
 import com.stakkato95.service.drone.socket.transport.model.response.ActionFinished;
-import com.stakkato95.service.drone.socket.transport.model.response.DroneInfo;
+import com.stakkato95.service.drone.socket.transport.model.response.ShowUp;
 import com.stakkato95.service.drone.socket.transport.model.response.PingAck;
 import com.stakkato95.service.drone.socket.transport.model.response.StartSessionAck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import reactor.core.publisher.EmitterProcessor;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,42 +26,42 @@ public class DroneSocketHandler extends TextWebSocketHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(DroneSocketHandler.class);
 
     private final ObjectMapper objectMapper;
-    private final MongoTemplate mongoTemplate;
-    private List<WebSocketSession> sessions;
-    private Map<MessageType, SocketMessageConsumer> handlers;
+    private final Map<MessageType, SocketMessageConsumer> handlers = new HashMap<>();
     private SocketConnectionResponder responder;
 
-    public DroneSocketHandler(MongoTemplate mongoTemplate, ObjectMapper objectMapper) {
-        this.mongoTemplate = mongoTemplate;
-        this.objectMapper = objectMapper;
+    final private PublishSubject<WebSocketSession> establishedCon  = new PublishSubject<>();
+    final private PublishSubject<WebSocketSession> closedCon  = new PublishSubject<>();
 
-        sessions = new ArrayList<>();
-        handlers = new HashMap<>();
+    public DroneSocketHandler(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         initHandlers();
+    }
+
+    public EmitterProcessor<WebSocketSession> getEstablishedCon() {
+        return establishedCon.getEmitter();
+    }
+
+    public EmitterProcessor<WebSocketSession> getClosedCon() {
+        return closedCon.getEmitter();
     }
 
     void setResponder(SocketConnectionResponder responder) {
         this.responder = responder;
     }
 
-    public <T> void sendMessage(T payload, MessageType type) throws IOException {
-        if (sessions.isEmpty()) {
-            LOGGER.error("Message can't be sent. Drone isn't connected.");
-            return;
-        }
-
+    public <T> void sendMessage(WebSocketSession session, T payload, MessageType type) throws IOException {
         Message<T> message = new Message<>();
         message.messageType = type;
         message.payload = payload;
 
         String json = objectMapper.writeValueAsString(message);
-        sessions.get(0).sendMessage(new TextMessage(json));
+        session.sendMessage(new TextMessage(json));
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         super.afterConnectionEstablished(session);
-        this.sessions.add(session);
+        establishedCon.next(session);
     }
 
     @Override
@@ -80,11 +81,11 @@ public class DroneSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         super.afterConnectionClosed(session, status);
-        this.sessions.remove(session);
+        closedCon.next(session);
     }
 
     private void initHandlers() {
-        handlers.put(MessageType.SHOW_UP, (s, p) -> callResponder(p, responder::onShowUp, DroneInfo.class));
+        handlers.put(MessageType.SHOW_UP, (s, p) -> callResponder(p, responder::onShowUp, ShowUp.class));
         handlers.put(MessageType.START_SESSION_ACK, (s, p) -> callResponder(p, responder::onStartSessionAck, StartSessionAck.class));
         handlers.put(MessageType.PING_ACK, (s, p) -> callResponder(p, responder::onPingAck, PingAck.class));
         handlers.put(MessageType.ACTION_FINISHED, (s, p) -> callResponder(p, responder::onActionFinished, ActionFinished.class));

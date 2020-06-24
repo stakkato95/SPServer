@@ -1,6 +1,10 @@
 package com.stakkato95.service.drone.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stakkato95.service.drone.domain.action.ActionRepository;
+import com.stakkato95.service.drone.domain.drone.DroneRepository;
+import com.stakkato95.service.drone.domain.session.SessionRepository;
+import com.stakkato95.service.drone.domain.session.SessionManager;
 import com.stakkato95.service.drone.socket.DroneConnection;
 import com.stakkato95.service.drone.socket.DroneSocketHandler;
 import org.springframework.context.annotation.Bean;
@@ -11,12 +15,22 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 public class SocketConnectionConfig {
 
     @Bean
-    public DroneSocketHandler getDroneHandler(MongoTemplate mongoTemplate, ObjectMapper objectMapper) {
-        return new DroneSocketHandler(mongoTemplate, objectMapper);
+    public DroneSocketHandler getDroneHandler(ObjectMapper objectMapper) {
+        return new DroneSocketHandler(objectMapper);
     }
 
     @Bean
-    public DroneConnection getDroneConnection(DroneSocketHandler handler, MongoTemplate mongo) {
-        return new DroneConnection(handler, mongo);
+    public DroneConnection getDroneConnection(DroneSocketHandler handler,
+                                              DroneRepository droneRepo,
+                                              ActionRepository actionRepo) {
+        return new DroneConnection(handler, droneRepo, actionRepo);
+    }
+
+    @Bean
+    public SessionManager getSessionManager(DroneConnection con,
+                                            SessionRepository sessionRepo,
+                                            DroneRepository droneRepo,
+                                            ActionRepository actionRepo) {
+        return new SessionManager(con, sessionRepo, droneRepo, actionRepo);
     }
 }

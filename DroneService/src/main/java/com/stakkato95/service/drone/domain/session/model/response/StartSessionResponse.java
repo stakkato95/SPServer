@@ -1,4 +1,4 @@
-package com.stakkato95.service.drone.rest.session.model.response;
+package com.stakkato95.service.drone.domain.session.model.response;
 
 import com.stakkato95.service.drone.model.session.FlightState;
 import com.stakkato95.service.drone.model.session.SessionState;

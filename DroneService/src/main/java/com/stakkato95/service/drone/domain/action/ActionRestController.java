@@ -1,13 +1,11 @@
-package com.stakkato95.service.drone.rest.action;
+package com.stakkato95.service.drone.domain.action;
 
+import com.stakkato95.service.drone.domain.session.SessionManager;
 import com.stakkato95.service.drone.model.action.Action;
-import com.stakkato95.service.drone.model.action.ActionState;
 import com.stakkato95.service.drone.model.session.Session;
-import com.stakkato95.service.drone.rest.RestResponse;
-import com.stakkato95.service.drone.rest.action.model.request.AllActionsRequest;
-import com.stakkato95.service.drone.rest.action.model.request.StartActionRequest;
+import com.stakkato95.service.drone.domain.RestResponse;
+import com.stakkato95.service.drone.domain.action.model.request.StartActionRequest;
 import com.stakkato95.service.drone.socket.DroneConnection;
-import org.reactivestreams.Publisher;
 import org.springframework.data.mongodb.core.ChangeStreamEvent;
 import org.springframework.data.mongodb.core.ChangeStreamOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -19,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
-import java.util.function.Function;
 
 @CrossOrigin
 @RestController
@@ -32,38 +29,23 @@ public class ActionRestController {
     private final MongoTemplate mongoTemplate;
     private final ReactiveMongoTemplate reactiveMongoTemplate;
     private final DroneConnection droneConnection;
+    private final SessionManager sessionManager;
 
     public ActionRestController(MongoTemplate mongoTemplate,
                                 DroneConnection droneConnection,
-                                ReactiveMongoTemplate reactiveMongoTemplate) {
+                                ReactiveMongoTemplate reactiveMongoTemplate,
+                                SessionManager sessionManager) {
         this.mongoTemplate = mongoTemplate;
         this.droneConnection = droneConnection;
         this.reactiveMongoTemplate = reactiveMongoTemplate;
+        this.sessionManager = sessionManager;
     }
 
     @PostMapping(value = "/start", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public RestResponse<Action> start(@RequestBody StartActionRequest request) {
-        Session session = mongoTemplate.findById(request.sessionId, Session.class);
+    public RestResponse<Action> start(@RequestBody StartActionRequest req) {
+        Action action = sessionManager.sendAction(req.sessionId, req.actionType, req.value);
 
         RestResponse<Action> response = new RestResponse<>();
-
-        if (session == null) {
-            response.successful = false;
-            response.message = String.format("session with id '%s' doesn't exist", request.sessionId);
-            return response;
-        }
-
-        Action action = new Action();
-        action.sessionId = request.sessionId;
-        action.actionType = request.actionType;
-        action.actionState = ActionState.RUNNING;
-        action.value = request.value;
-
-        action = mongoTemplate.save(action);
-
-        //TODO implement logic with acknowledgements
-        droneConnection.sendAction(action.id, request.actionType, request.value);
-
         response.successful = true;
         response.payload = action;
         return response;

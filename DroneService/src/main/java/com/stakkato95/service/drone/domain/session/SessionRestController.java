@@ -1,24 +1,25 @@
-package com.stakkato95.service.drone.rest.session;
+package com.stakkato95.service.drone.domain.session;
 
-import com.stakkato95.service.drone.model.session.FlightState;
 import com.stakkato95.service.drone.model.session.Session;
 import com.stakkato95.service.drone.model.session.SessionState;
-import com.stakkato95.service.drone.rest.RestResponse;
-import com.stakkato95.service.drone.rest.session.model.request.SessionRequest;
-import com.stakkato95.service.drone.rest.session.model.request.StartSessionRequest;
-import com.stakkato95.service.drone.rest.session.model.request.StopSessionRequest;
-import com.stakkato95.service.drone.rest.session.model.response.SessionResponse;
-import com.stakkato95.service.drone.rest.session.model.response.StartSessionResponse;
-import com.stakkato95.service.drone.socket.DroneSocketHandler;
-import com.stakkato95.service.drone.socket.transport.MessageType;
-import com.stakkato95.service.drone.socket.transport.model.request.StartSession;
+import com.stakkato95.service.drone.domain.RestResponse;
+import com.stakkato95.service.drone.domain.session.model.request.SessionRequest;
+import com.stakkato95.service.drone.domain.session.model.request.StartSessionRequest;
+import com.stakkato95.service.drone.domain.session.model.request.StopSessionRequest;
+import com.stakkato95.service.drone.domain.session.model.response.SessionResponse;
+import com.stakkato95.service.drone.domain.session.model.response.StartSessionResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.mongodb.core.ChangeStreamEvent;
+import org.springframework.data.mongodb.core.ChangeStreamOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
-import java.io.IOException;
 import java.util.Date;
 
 @CrossOrigin
@@ -26,33 +27,26 @@ import java.util.Date;
 @RequestMapping("/api/session")
 public class SessionRestController {
 
-    private final MongoTemplate mongoTemplate;
-    private final DroneSocketHandler droneSocketHandler;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionRestController.class);
 
-    public SessionRestController(MongoTemplate mongoTemplate, DroneSocketHandler droneSocketHandler) {
+    private static final String DATABASE_NAME = "skynetz";
+    private static final String COLLECTION_TO_LISTEN = "session";
+
+    private final MongoTemplate mongoTemplate;
+    private final ReactiveMongoTemplate reactiveMongo;
+    private final SessionManager sessionManager;
+
+    public SessionRestController(MongoTemplate mongoTemplate,
+                                 ReactiveMongoTemplate reactiveMongo,
+                                 SessionManager sessionManager) {
         this.mongoTemplate = mongoTemplate;
-        this.droneSocketHandler = droneSocketHandler;
+        this.reactiveMongo = reactiveMongo;
+        this.sessionManager = sessionManager;
     }
 
     @PostMapping(value = "/startSession", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public RestResponse<StartSessionResponse> startSession(@RequestBody(required = false) StartSessionRequest request) {
-        Session session = new Session();
-        session.droneId = request.droneId;
-        session.flightState = FlightState.LANDED;
-        session.sessionStartTime = new Date();
-        session.sessionState = SessionState.RUNNING;
-        session = mongoTemplate.save(session);
-
-        try {
-            StartSession startSession = new StartSession();
-            startSession.sessionId = session.id;
-            droneSocketHandler.sendMessage(startSession, MessageType.START_SESSION);
-        } catch (IOException e) {
-            RestResponse<StartSessionResponse> response = new RestResponse<>();
-            response.successful = false;
-            response.message = String.format("Exception: '%s'", e.getMessage());
-            return response;
-        }
+        Session session = sessionManager.startSession(request.droneId);
 
         StartSessionResponse startSessionResponse = new StartSessionResponse();
         startSessionResponse.droneId = session.droneId;
@@ -133,6 +127,17 @@ public class SessionRestController {
         response.successful = true;
         response.payload = session;
         return response;
+    }
+
+    @GetMapping(value = "/getUpdates", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<Session> getUpdates() {
+        LOGGER.error("CALLED");
+        return reactiveMongo.changeStream(
+                DATABASE_NAME,
+                COLLECTION_TO_LISTEN,
+                ChangeStreamOptions.builder().build(),
+                Session.class
+        ).map(ChangeStreamEvent::getBody);
     }
 
     private SessionResponse populateSessionResponse(Session session) {

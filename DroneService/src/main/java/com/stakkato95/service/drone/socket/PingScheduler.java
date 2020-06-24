@@ -18,6 +18,6 @@ public class PingScheduler {
 
     @Scheduled(fixedRateString = "${socket.ping-delay-millisec}")
     public void sendPing() {
-        connection.sendPing();
+        connection.sendPingToAll();
     }
 }

@@ -1,4 +1,4 @@
-package com.stakkato95.service.drone.rest.action.model.request;
+package com.stakkato95.service.drone.domain.action.model.request;
 
 import com.stakkato95.service.drone.model.action.ActionType;
 

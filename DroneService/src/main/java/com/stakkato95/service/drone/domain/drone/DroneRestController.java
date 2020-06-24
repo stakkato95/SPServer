@@ -1,11 +1,10 @@
-package com.stakkato95.service.drone.rest.drone;
+package com.stakkato95.service.drone.domain.drone;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stakkato95.service.drone.model.drone.Drone;
 import com.stakkato95.service.drone.model.drone.UnregisteredDrone;
-import com.stakkato95.service.drone.rest.RestResponse;
-import com.stakkato95.service.drone.rest.drone.model.RegistrationRequest;
-import com.stakkato95.service.drone.socket.DroneSocketHandler;
+import com.stakkato95.service.drone.domain.RestResponse;
+import com.stakkato95.service.drone.domain.drone.model.RegistrationRequest;
+import com.stakkato95.service.drone.socket.DroneConnection;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -21,15 +20,11 @@ import java.util.List;
 public class DroneRestController {
 
     private final MongoTemplate mongoTemplate;
-    private final DroneSocketHandler droneSocketHandler;
-    private final ObjectMapper objectMapper;
+    private final DroneConnection droneConnection;
 
-    public DroneRestController(MongoTemplate mongoTemplate,
-                               DroneSocketHandler droneSocketHandler,
-                               ObjectMapper objectMapper) {
+    public DroneRestController(MongoTemplate mongoTemplate, DroneConnection droneConnection) {
         this.mongoTemplate = mongoTemplate;
-        this.droneSocketHandler = droneSocketHandler;
-        this.objectMapper = objectMapper;
+        this.droneConnection = droneConnection;
     }
 
     @GetMapping(value = "/getAllRegistered", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -64,6 +59,8 @@ public class DroneRestController {
         drone.lastSeenTime = registrationTime;
         drone.lastConnectionTime = unregistered.showUpTime;
         drone = mongoTemplate.save(drone);
+
+        droneConnection.sendRegistration(unregistered.ip, drone.id);
 
         //TODO uncomment
 //        try {
