@@ -1,6 +1,8 @@
 package com.stakkato95.service.drone.domain.action;
 
 import com.stakkato95.service.drone.domain.session.SessionManager;
+import com.stakkato95.service.drone.helper.BsonHelper;
+import com.stakkato95.service.drone.helper.DatabaseUpdate;
 import com.stakkato95.service.drone.model.action.Action;
 import com.stakkato95.service.drone.model.session.Session;
 import com.stakkato95.service.drone.domain.RestResponse;
@@ -11,6 +13,7 @@ import org.springframework.data.mongodb.core.ChangeStreamOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.CriteriaDefinition;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -67,7 +70,7 @@ public class ActionRestController {
         }
 
         List<Action> actions = mongoTemplate.find(
-                Query.query(Criteria.where("sessionId").is(sessionId)),
+                Query.query(Criteria.where("sessionId").is(sessionId).and("actionState").is("RUNNING")),
                 Action.class
         );
 
@@ -77,13 +80,18 @@ public class ActionRestController {
     }
 
     @GetMapping(value = "/getUpdates", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<Action> getUpdates() {
+    public Flux<DatabaseUpdate<Action>> getUpdates() {
         return reactiveMongoTemplate.changeStream(
                 DATABASE_NAME,
                 COLLECTION_TO_LISTEN,
                 ChangeStreamOptions.builder().build(),
                 Action.class
-        ).map(ChangeStreamEvent::getBody);
+        ).map(e -> {
+            DatabaseUpdate<Action> update = new DatabaseUpdate<>();
+            update.id = BsonHelper.getObjectId(e);
+            update.object = e.getBody();
+            return update;
+        });
     }
 
     @GetMapping(value = "/test")

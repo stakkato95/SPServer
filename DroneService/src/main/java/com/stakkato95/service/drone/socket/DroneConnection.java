@@ -41,7 +41,7 @@ public class DroneConnection implements SocketConnectionResponder {
         this.actionRepo = actionRepo;
 
         this.socketHandler.getEstablishedCon().subscribe(this::onSocketSessionStarted);
-        this.socketHandler.getEstablishedCon().subscribe(this::onSocketSessionFinished);
+        this.socketHandler.getClosedCon().subscribe(this::onSocketSessionFinished);
     }
 
     public DroneSocketHandler getSocketHandler() {
@@ -53,7 +53,7 @@ public class DroneConnection implements SocketConnectionResponder {
     }
 
     void onSocketSessionFinished(WebSocketSession session) {
-        sessions.add(session);
+        sessions.remove(session);
     }
 
     @Override

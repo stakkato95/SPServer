@@ -41,7 +41,7 @@ public class SessionManager {
                 .map(WebSocketSession::getRemoteAddress)
                 .map(InetSocketAddress::getAddress)
                 .map(InetAddress::getHostAddress)
-                .subscribe(this::onSocketSessionFinished);
+                .subscribe(this::onSocketSessionStarted);
 
         this.droneConnection.getSocketHandler()
                 .getClosedCon()

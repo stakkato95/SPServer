@@ -1,5 +1,8 @@
 package com.stakkato95.service.drone.domain.session;
 
+import com.stakkato95.service.drone.helper.BsonHelper;
+import com.stakkato95.service.drone.helper.DatabaseUpdate;
+import com.stakkato95.service.drone.model.action.Action;
 import com.stakkato95.service.drone.model.session.Session;
 import com.stakkato95.service.drone.model.session.SessionState;
 import com.stakkato95.service.drone.domain.RestResponse;
@@ -130,14 +133,19 @@ public class SessionRestController {
     }
 
     @GetMapping(value = "/getUpdates", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<Session> getUpdates() {
+    public Flux<DatabaseUpdate<Session>> getUpdates() {
         LOGGER.error("CALLED");
         return reactiveMongo.changeStream(
                 DATABASE_NAME,
                 COLLECTION_TO_LISTEN,
                 ChangeStreamOptions.builder().build(),
                 Session.class
-        ).map(ChangeStreamEvent::getBody);
+        ).map(e -> {
+            DatabaseUpdate<Session> update = new DatabaseUpdate<>();
+            update.id = BsonHelper.getObjectId(e);
+            update.object = e.getBody();
+            return update;
+        });
     }
 
     private SessionResponse populateSessionResponse(Session session) {
