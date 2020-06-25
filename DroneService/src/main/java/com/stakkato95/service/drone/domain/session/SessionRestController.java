@@ -2,7 +2,6 @@ package com.stakkato95.service.drone.domain.session;
 
 import com.stakkato95.service.drone.helper.BsonHelper;
 import com.stakkato95.service.drone.helper.DatabaseUpdate;
-import com.stakkato95.service.drone.model.action.Action;
 import com.stakkato95.service.drone.model.session.Session;
 import com.stakkato95.service.drone.model.session.SessionState;
 import com.stakkato95.service.drone.domain.RestResponse;
@@ -13,7 +12,6 @@ import com.stakkato95.service.drone.domain.session.model.response.SessionRespons
 import com.stakkato95.service.drone.domain.session.model.response.StartSessionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.mongodb.core.ChangeStreamEvent;
 import org.springframework.data.mongodb.core.ChangeStreamOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;

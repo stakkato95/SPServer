@@ -3,7 +3,10 @@ package com.stakkato95.service.drone.domain.action;
 import com.stakkato95.service.drone.model.action.Action;
 import com.stakkato95.service.drone.model.action.ActionState;
 import com.stakkato95.service.drone.model.action.ActionType;
+import com.stakkato95.service.drone.model.drone.Drone;
 import org.springframework.data.mongodb.core.MongoTemplate;
+
+import java.util.List;
 
 public class ActionRepository {
 

@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.Date;
+import java.util.List;
 
 public class DroneRepository {
 
@@ -41,5 +42,33 @@ public class DroneRepository {
 
     public Drone getDroneByIp(String ip) {
         return mongo.findOne(Query.query(Criteria.where("ip").is(ip)), Drone.class);
+    }
+
+    public List<Drone> getAllRegisteredDrones() {
+        return mongo.findAll(Drone.class);
+    }
+
+    public List<UnregisteredDrone> getAllUnregisteredDrones() {
+        return mongo.findAll(UnregisteredDrone.class);
+    }
+
+    public UnregisteredDrone getUnregisteredDroneById(String id) {
+        return mongo.findById(id, UnregisteredDrone.class);
+    }
+
+    public Drone createDrone(String ip, Date showUpTime, String name) {
+        Drone drone = new Drone();
+        drone.ip = ip;
+        drone.showUpTime = showUpTime;
+        drone.name = name;
+        Date registrationTime = new Date();
+        drone.registrationTime = registrationTime;
+        drone.lastSeenTime = registrationTime;
+        drone.lastConnectionTime = showUpTime;
+        return mongo.save(drone);
+    }
+
+    public void removeUnregisteredDrone(String id) {
+        mongo.remove(Query.query(Criteria.where("id").is(id)), UnregisteredDrone.class);
     }
 }

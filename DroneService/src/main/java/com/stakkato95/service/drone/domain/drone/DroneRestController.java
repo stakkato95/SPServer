@@ -5,13 +5,9 @@ import com.stakkato95.service.drone.model.drone.UnregisteredDrone;
 import com.stakkato95.service.drone.domain.RestResponse;
 import com.stakkato95.service.drone.domain.drone.model.RegistrationRequest;
 import com.stakkato95.service.drone.socket.DroneConnection;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 
 @CrossOrigin
@@ -19,64 +15,39 @@ import java.util.List;
 @RequestMapping("/api/drone")
 public class DroneRestController {
 
-    private final MongoTemplate mongoTemplate;
+    private final DroneRepository droneRepo;
     private final DroneConnection droneConnection;
 
-    public DroneRestController(MongoTemplate mongoTemplate, DroneConnection droneConnection) {
-        this.mongoTemplate = mongoTemplate;
+    public DroneRestController(DroneConnection droneConnection, DroneRepository droneRepo) {
+        this.droneRepo = droneRepo;
         this.droneConnection = droneConnection;
     }
 
     @GetMapping(value = "/getAllRegistered", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Drone> getAllRegistered() {
-        return mongoTemplate.findAll(Drone.class);
+        return droneRepo.getAllRegisteredDrones();
     }
 
     @GetMapping(value = "/getAllUnregistered", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<UnregisteredDrone> getAllUnregistered() {
-        return mongoTemplate.findAll(UnregisteredDrone.class);
+        return droneRepo.getAllUnregisteredDrones();
     }
 
     @PostMapping(value = "/registerNew", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public RestResponse<Drone> registerNew(@RequestBody RegistrationRequest registration) throws InterruptedException {
         Thread.sleep(2000);
+        UnregisteredDrone unregistered = droneRepo.getUnregisteredDroneById(registration.unregisteredId);
 
         RestResponse<Drone> response = new RestResponse<>();
-
-        UnregisteredDrone unregistered = mongoTemplate.findById(registration.unregisteredId, UnregisteredDrone.class);
         if (unregistered == null) {
             response.successful = false;
             response.message = String.format("Drone with id '%s' not found", registration.unregisteredId);
             return response;
         }
 
-        Drone drone = new Drone();
-        drone.ip = unregistered.ip;
-        drone.showUpTime = unregistered.showUpTime;
-        drone.name = registration.name;
-        Date registrationTime = new Date();
-        drone.registrationTime = registrationTime;
-        drone.lastSeenTime = registrationTime;
-        drone.lastConnectionTime = unregistered.showUpTime;
-        drone = mongoTemplate.save(drone);
-
+        Drone drone = droneRepo.createDrone(unregistered.ip, unregistered.showUpTime, registration.name);
         droneConnection.sendRegistration(unregistered.ip, drone.id);
-
-        //TODO uncomment
-//        try {
-//            Registration reg = new Registration();
-//            reg.id = drone.id;
-//            droneSocketHandler.sendMessage(reg, MessageType.REGISTRATION);
-//        } catch (Exception e) {
-//            response.successful = false;
-//            response.message = String.format("Exception: '%s'", e.getMessage());
-//            return response;
-//        }
-
-        mongoTemplate.remove(
-                Query.query(Criteria.where("id").is(registration.unregisteredId)),
-                UnregisteredDrone.class
-        );
+        droneRepo.removeUnregisteredDrone(registration.unregisteredId);
 
         response.successful = true;
         response.payload = drone;
@@ -85,7 +56,7 @@ public class DroneRestController {
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public RestResponse<Drone> getDrone(@PathVariable String id) {
-        Drone drone = mongoTemplate.findById(id, Drone.class);
+        Drone drone = droneRepo.getDroneById(id);
 
         RestResponse<Drone> response = new RestResponse<>();
         if (drone == null) {
