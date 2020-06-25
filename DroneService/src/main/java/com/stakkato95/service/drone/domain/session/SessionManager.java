@@ -65,6 +65,7 @@ public class SessionManager {
         }
 
         sessionRepo.markSessionAsInterrupted(session);
+        actionRepo.markRunningActionsAsInterrupted(session.id);
     }
 
     public Session startSession(String droneId) {
