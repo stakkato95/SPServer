@@ -51,7 +51,8 @@ public class SessionRestController {
     }
 
     @PostMapping(value = "/startSession", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public RestResponse<Session> startSession(@RequestBody(required = false) StartSessionRequest request) {
+    public RestResponse<Session> startSession(@RequestBody(required = false) StartSessionRequest request) throws InterruptedException {
+        Thread.sleep(1000);
         Session session = sessionManager.startSession(request.droneId);
         RestResponse<Session> response = new RestResponse<>();
         response.successful = true;
