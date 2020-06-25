@@ -1,12 +1,20 @@
 package com.stakkato95.service.drone.domain.drone;
 
+import com.stakkato95.service.drone.helper.BsonHelper;
+import com.stakkato95.service.drone.helper.CommonHelper;
+import com.stakkato95.service.drone.helper.Const;
+import com.stakkato95.service.drone.helper.DatabaseUpdate;
 import com.stakkato95.service.drone.model.drone.Drone;
 import com.stakkato95.service.drone.model.drone.UnregisteredDrone;
 import com.stakkato95.service.drone.domain.RestResponse;
 import com.stakkato95.service.drone.domain.drone.model.RegistrationRequest;
+import com.stakkato95.service.drone.model.session.Session;
 import com.stakkato95.service.drone.socket.DroneConnection;
+import org.springframework.data.mongodb.core.ChangeStreamOptions;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -15,12 +23,18 @@ import java.util.List;
 @RequestMapping("/api/drone")
 public class DroneRestController {
 
+    private static final String COLLECTION = "drone";
+
     private final DroneRepository droneRepo;
     private final DroneConnection droneConnection;
+    private final ReactiveMongoTemplate reactiveMongo;
 
-    public DroneRestController(DroneConnection droneConnection, DroneRepository droneRepo) {
+    public DroneRestController(DroneConnection droneConnection,
+                               DroneRepository droneRepo,
+                               ReactiveMongoTemplate reactiveMongo) {
         this.droneRepo = droneRepo;
         this.droneConnection = droneConnection;
+        this.reactiveMongo = reactiveMongo;
     }
 
     @GetMapping(value = "/getAllRegistered", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -68,5 +82,10 @@ public class DroneRestController {
         response.successful = true;
         response.payload = drone;
         return response;
+    }
+
+    @GetMapping(value = "/getUpdates", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<DatabaseUpdate<Drone>> getUpdates() {
+        return CommonHelper.getChangeStream(reactiveMongo, COLLECTION, Drone.class);
     }
 }

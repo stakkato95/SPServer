@@ -2,6 +2,8 @@ package com.stakkato95.service.drone.domain.action;
 
 import com.stakkato95.service.drone.domain.session.SessionManager;
 import com.stakkato95.service.drone.helper.BsonHelper;
+import com.stakkato95.service.drone.helper.CommonHelper;
+import com.stakkato95.service.drone.helper.Const;
 import com.stakkato95.service.drone.helper.DatabaseUpdate;
 import com.stakkato95.service.drone.model.action.Action;
 import com.stakkato95.service.drone.model.session.Session;
@@ -25,7 +27,7 @@ import java.util.List;
 public class ActionRestController {
 
     private static final String DATABASE_NAME = "skynetz";
-    private static final String COLLECTION_TO_LISTEN = "action";
+    private static final String COLLECTION = "action";
 
     private final MongoTemplate mongoTemplate;
     private final ReactiveMongoTemplate reactiveMongoTemplate;
@@ -79,17 +81,7 @@ public class ActionRestController {
 
     @GetMapping(value = "/getUpdates", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<DatabaseUpdate<Action>> getUpdates() {
-        return reactiveMongoTemplate.changeStream(
-                DATABASE_NAME,
-                COLLECTION_TO_LISTEN,
-                ChangeStreamOptions.builder().build(),
-                Action.class
-        ).map(e -> {
-            DatabaseUpdate<Action> update = new DatabaseUpdate<>();
-            update.id = BsonHelper.getObjectId(e);
-            update.object = e.getBody();
-            return update;
-        });
+        return CommonHelper.getChangeStream(reactiveMongoTemplate, COLLECTION, Action.class);
     }
 
     @GetMapping(value = "/test")

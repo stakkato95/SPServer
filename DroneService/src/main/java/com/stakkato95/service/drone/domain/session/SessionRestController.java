@@ -1,7 +1,10 @@
 package com.stakkato95.service.drone.domain.session;
 
 import com.stakkato95.service.drone.helper.BsonHelper;
+import com.stakkato95.service.drone.helper.CommonHelper;
+import com.stakkato95.service.drone.helper.Const;
 import com.stakkato95.service.drone.helper.DatabaseUpdate;
+import com.stakkato95.service.drone.model.action.Action;
 import com.stakkato95.service.drone.model.session.Session;
 import com.stakkato95.service.drone.model.session.SessionState;
 import com.stakkato95.service.drone.domain.RestResponse;
@@ -30,7 +33,7 @@ public class SessionRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionRestController.class);
 
     private static final String DATABASE_NAME = "skynetz";
-    private static final String COLLECTION_TO_LISTEN = "session";
+    private static final String COLLECTION = "session";
 
     private final MongoTemplate mongoTemplate;
     private final ReactiveMongoTemplate reactiveMongo;
@@ -125,18 +128,7 @@ public class SessionRestController {
 
     @GetMapping(value = "/getUpdates", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<DatabaseUpdate<Session>> getUpdates() {
-        LOGGER.error("CALLED");
-        return reactiveMongo.changeStream(
-                DATABASE_NAME,
-                COLLECTION_TO_LISTEN,
-                ChangeStreamOptions.builder().build(),
-                Session.class
-        ).map(e -> {
-            DatabaseUpdate<Session> update = new DatabaseUpdate<>();
-            update.id = BsonHelper.getObjectId(e);
-            update.object = e.getBody();
-            return update;
-        });
+        return CommonHelper.getChangeStream(reactiveMongo, COLLECTION, Session.class);
     }
 
     private SessionResponse populateSessionResponse(Session session) {
