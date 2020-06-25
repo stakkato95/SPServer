@@ -35,30 +35,25 @@ public class SessionRestController {
 
     private final MongoTemplate mongoTemplate;
     private final ReactiveMongoTemplate reactiveMongo;
+    private final SessionRepository sessionRepo;
     private final SessionManager sessionManager;
 
     public SessionRestController(MongoTemplate mongoTemplate,
                                  ReactiveMongoTemplate reactiveMongo,
-                                 SessionManager sessionManager) {
+                                 SessionManager sessionManager,
+                                 SessionRepository sessionRepo) {
         this.mongoTemplate = mongoTemplate;
         this.reactiveMongo = reactiveMongo;
         this.sessionManager = sessionManager;
+        this.sessionRepo = sessionRepo;
     }
 
     @PostMapping(value = "/startSession", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public RestResponse<StartSessionResponse> startSession(@RequestBody(required = false) StartSessionRequest request) {
+    public RestResponse<Session> startSession(@RequestBody(required = false) StartSessionRequest request) {
         Session session = sessionManager.startSession(request.droneId);
-
-        StartSessionResponse startSessionResponse = new StartSessionResponse();
-        startSessionResponse.droneId = session.droneId;
-        startSessionResponse.sessionId = session.id;
-        startSessionResponse.sessionStartTime = session.sessionStartTime;
-        startSessionResponse.sessionState = session.sessionState;
-        startSessionResponse.flightState = session.flightState;
-
-        RestResponse<StartSessionResponse> response = new RestResponse<>();
+        RestResponse<Session> response = new RestResponse<>();
         response.successful = true;
-        response.payload = startSessionResponse;
+        response.payload = session;
         return response;
     }
 

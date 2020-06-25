@@ -68,21 +68,10 @@ public class SessionManager {
     }
 
     public Session startSession(String droneId) {
-        //TODO WHERE TO PUT public void sendPingToAll()????????
-        //TODO WHERE TO PUT public void sendPingToAll()????????
-        //TODO WHERE TO PUT public void sendPingToAll()????????
-        //TODO WHERE TO PUT public void sendPingToAll()????????
-        //TODO WHERE TO PUT public void sendPingToAll()????????
-        //TODO WHERE TO PUT public void sendPingToAll()????????
-        //TODO WHERE TO PUT public void sendPingToAll()????????
-        //TODO WHERE TO PUT public void sendPingToAll()????????
-
         Session session = sessionRepo.createNewSession(droneId);
         Drone drone = droneRepo.getDroneById(droneId);
         droneConnection.sendStartSession(drone.ip, session.id);
         sessionIdToDroneIp.put(session.id, drone.ip);
-
-        //TODO create DroneRepo and SessionREpo????????????
         return session;
     }
 
