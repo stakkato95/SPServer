@@ -58,7 +58,6 @@ public class SessionRestController {
 
     @PostMapping(value = "/stopSession", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public RestResponse<Session> stopSession(@RequestBody StopSessionRequest req) throws InterruptedException {
-        Thread.sleep(3000);
         Session session = mongoTemplate.findById(req.sessionId, Session.class);
 
         RestResponse<Session> response = new RestResponse<>();
