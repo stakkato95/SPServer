@@ -9,7 +9,6 @@ import com.stakkato95.service.drone.domain.session.model.request.SessionRequest;
 import com.stakkato95.service.drone.domain.session.model.request.StartSessionRequest;
 import com.stakkato95.service.drone.domain.session.model.request.StopSessionRequest;
 import com.stakkato95.service.drone.domain.session.model.response.SessionResponse;
-import com.stakkato95.service.drone.domain.session.model.response.StartSessionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.ChangeStreamOptions;
@@ -58,19 +57,20 @@ public class SessionRestController {
     }
 
     @PostMapping(value = "/stopSession", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public RestResponse<SessionResponse> stopSession(@RequestBody StopSessionRequest request) {
-        Session session = mongoTemplate.findById(request.sessionId, Session.class);
+    public RestResponse<Session> stopSession(@RequestBody StopSessionRequest req) throws InterruptedException {
+        Thread.sleep(3000);
+        Session session = mongoTemplate.findById(req.sessionId, Session.class);
 
-        RestResponse<SessionResponse> response = new RestResponse<>();
+        RestResponse<Session> response = new RestResponse<>();
 
         if (session == null) {
             response.successful = false;
-            response.message = String.format("no session with id '%s' found", request.sessionId);
+            response.message = String.format("no session with id '%s' found", req.sessionId);
             return response;
         }
         if (session.sessionState == SessionState.FINISHED) {
             response.successful = false;
-            response.message = String.format("session with id '%s' is already finished", request.sessionId);
+            response.message = String.format("session with id '%s' is already finished", req.sessionId);
             return response;
         }
 
@@ -79,8 +79,7 @@ public class SessionRestController {
         mongoTemplate.save(session);
 
         response.successful = true;
-        response.payload = populateSessionResponse(session);
-        ;
+        response.payload = session;
         return response;
     }
 
