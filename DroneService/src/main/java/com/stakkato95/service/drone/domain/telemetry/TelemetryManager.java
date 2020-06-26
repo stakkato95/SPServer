@@ -21,7 +21,7 @@ public class TelemetryManager {
 
     private final ObjectMapper mapper;
     private final TelemetryRepository telemetryRepo;
-    private final Map<String, Class> topicToClass;
+    private final Map<String, Class<?>> topicToClass;
 
     public TelemetryManager(ObjectMapper mapper, TelemetryRepository telemetryRepo) {
         this.mapper = mapper;
