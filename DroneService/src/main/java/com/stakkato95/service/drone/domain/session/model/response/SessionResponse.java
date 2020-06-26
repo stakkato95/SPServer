@@ -1,6 +1,6 @@
 package com.stakkato95.service.drone.domain.session.model.response;
 
-import com.stakkato95.service.drone.model.common.Position;
+import com.stakkato95.service.drone.model.telemetry.GNSS;
 import com.stakkato95.service.drone.model.session.Axis;
 import com.stakkato95.service.drone.model.session.FlightState;
 import com.stakkato95.service.drone.model.session.SessionState;
@@ -14,7 +14,7 @@ public class SessionResponse {
     public Date sessionEndTime;
     public FlightState flightState;
     public SessionState sessionState;
-    public Position position;
+    public GNSS GNSS;
     public Axis rotation;
     public Axis speed;
 }

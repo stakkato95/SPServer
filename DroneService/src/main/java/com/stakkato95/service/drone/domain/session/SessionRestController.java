@@ -1,10 +1,7 @@
 package com.stakkato95.service.drone.domain.session;
 
-import com.stakkato95.service.drone.helper.BsonHelper;
 import com.stakkato95.service.drone.helper.CommonHelper;
-import com.stakkato95.service.drone.helper.Const;
 import com.stakkato95.service.drone.helper.DatabaseUpdate;
-import com.stakkato95.service.drone.model.action.Action;
 import com.stakkato95.service.drone.model.session.Session;
 import com.stakkato95.service.drone.model.session.SessionState;
 import com.stakkato95.service.drone.domain.RestResponse;
@@ -14,7 +11,6 @@ import com.stakkato95.service.drone.domain.session.model.request.StopSessionRequ
 import com.stakkato95.service.drone.domain.session.model.response.SessionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.mongodb.core.ChangeStreamOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -32,7 +28,6 @@ public class SessionRestController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionRestController.class);
 
-    private static final String DATABASE_NAME = "skynetz";
     private static final String COLLECTION = "session";
 
     private final MongoTemplate mongoTemplate;
@@ -87,13 +82,13 @@ public class SessionRestController {
     }
 
     @GetMapping(value = "/getSession", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public RestResponse<SessionResponse> getSession(@RequestBody SessionRequest request) {
+    public RestResponse<Session> getSession(@RequestBody SessionRequest request) {
         Session session = mongoTemplate.findOne(
                 Query.query(Criteria.where("droneId").is(request.droneId)),
                 Session.class
         );
 
-        RestResponse<SessionResponse> response = new RestResponse<>();
+        RestResponse<Session> response = new RestResponse<>();
 
         if (session == null) {
             response.successful = false;
@@ -102,8 +97,7 @@ public class SessionRestController {
         }
 
         response.successful = true;
-        response.payload = populateSessionResponse(session);
-        ;
+        response.payload = session;
         return response;
     }
 
@@ -130,19 +124,5 @@ public class SessionRestController {
     @GetMapping(value = "/getUpdates", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<DatabaseUpdate<Session>> getUpdates() {
         return CommonHelper.getChangeStream(reactiveMongo, COLLECTION, Session.class);
-    }
-
-    private SessionResponse populateSessionResponse(Session session) {
-        SessionResponse sessionResponse = new SessionResponse();
-        sessionResponse.sessionId = session.id;
-        sessionResponse.droneId = session.droneId;
-        sessionResponse.flightState = session.flightState;
-        sessionResponse.sessionState = session.sessionState;
-        sessionResponse.sessionStartTime = session.sessionStartTime;
-        sessionResponse.sessionEndTime = session.sessionEndTime;
-        sessionResponse.position = session.position;
-        sessionResponse.rotation = session.rotation;
-        sessionResponse.speed = session.speed;
-        return sessionResponse;
     }
 }

@@ -58,7 +58,7 @@ public class DroneConnection implements SocketConnectionResponder {
 
     @Override
     public void onShowUp(ShowUp showUp) {
-        droneRepo.createUnregisteredDrone(showUp.ip, showUp.position);
+        droneRepo.createUnregisteredDrone(showUp.ip, showUp.GNSS);
     }
 
     @Override

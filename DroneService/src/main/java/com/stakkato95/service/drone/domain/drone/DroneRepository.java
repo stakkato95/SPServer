@@ -1,6 +1,6 @@
 package com.stakkato95.service.drone.domain.drone;
 
-import com.stakkato95.service.drone.model.common.Position;
+import com.stakkato95.service.drone.model.telemetry.GNSS;
 import com.stakkato95.service.drone.model.drone.Drone;
 import com.stakkato95.service.drone.model.drone.UnregisteredDrone;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -22,10 +22,10 @@ public class DroneRepository {
         return mongo.findById(id, Drone.class);
     }
 
-    public void createUnregisteredDrone(String ip, Position position) {
+    public void createUnregisteredDrone(String ip, GNSS GNSS) {
         UnregisteredDrone info = new UnregisteredDrone();
         info.ip = ip;
-        info.position = position;
+        info.GNSS = GNSS;
         info.showUpTime = new Date();
         mongo.save(info);
     }
