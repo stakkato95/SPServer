@@ -4,6 +4,8 @@ import com.stakkato95.service.drone.helper.Const;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Date;
+
 @Document(collection = Const.COLLECTION_ROTATION)
 public class Rotation {
     @Id
@@ -11,4 +13,5 @@ public class Rotation {
     public float x;
     public float y;
     public float z;
+    public Date timestamp;
 }

@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stakkato95.service.drone.helper.Const;
 import com.stakkato95.service.drone.model.telemetry.GNSS;
 import com.stakkato95.service.drone.model.telemetry.Rotation;
+import com.stakkato95.service.drone.model.telemetry.Speed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 
-import javax.swing.text.Position;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +29,7 @@ public class TelemetryManager {
 
         topicToClass = new HashMap<>();
         topicToClass.put(Const.MQTT_TOPIC_GNSS, GNSS.class);
-        topicToClass.put(Const.MQTT_TOPIC_POSITION, Position.class);
+        topicToClass.put(Const.MQTT_TOPIC_SPEED, Speed.class);
         topicToClass.put(Const.MQTT_TOPIC_ROTATION, Rotation.class);
     }
 

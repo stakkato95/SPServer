@@ -48,7 +48,7 @@ public class MqttConfig {
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
                 SERVER_CONSUMER,
                 mqttClientFactory(),
-                Const.MQTT_TOPIC_GNSS, Const.MQTT_TOPIC_POSITION, Const.MQTT_TOPIC_ROTATION
+                Const.MQTT_TOPIC_GNSS, Const.MQTT_TOPIC_SPEED, Const.MQTT_TOPIC_ROTATION
         );
         adapter.setCompletionTimeout(COMPLETION_TIMEOUT);
         adapter.setConverter(new DefaultPahoMessageConverter());
