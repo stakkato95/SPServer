@@ -1,5 +1,6 @@
 package com.stakkato95.service.drone.domain.drone;
 
+import com.stakkato95.service.drone.model.drone.Position;
 import com.stakkato95.service.drone.model.telemetry.GNSS;
 import com.stakkato95.service.drone.model.drone.Drone;
 import com.stakkato95.service.drone.model.drone.UnregisteredDrone;
@@ -22,10 +23,10 @@ public class DroneRepository {
         return mongo.findById(id, Drone.class);
     }
 
-    public void createUnregisteredDrone(String ip, GNSS GNSS) {
+    public void createUnregisteredDrone(String ip, Position position) {
         UnregisteredDrone info = new UnregisteredDrone();
         info.ip = ip;
-        info.GNSS = GNSS;
+        info.position = position;
         info.showUpTime = new Date();
         mongo.save(info);
     }
