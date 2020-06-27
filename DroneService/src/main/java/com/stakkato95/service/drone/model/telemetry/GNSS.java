@@ -1,9 +1,10 @@
 package com.stakkato95.service.drone.model.telemetry;
 
+import com.stakkato95.service.drone.helper.Const;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "telemetryGnss")
+@Document(collection = Const.COLLECTION_GNSS)
 public class GNSS {
     @Id
     public String id;

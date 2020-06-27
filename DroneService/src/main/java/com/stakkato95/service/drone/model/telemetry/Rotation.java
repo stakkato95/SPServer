@@ -1,9 +1,10 @@
 package com.stakkato95.service.drone.model.telemetry;
 
+import com.stakkato95.service.drone.helper.Const;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "telemetryRotation")
+@Document(collection = Const.COLLECTION_ROTATION)
 public class Rotation {
     @Id
     public String id;

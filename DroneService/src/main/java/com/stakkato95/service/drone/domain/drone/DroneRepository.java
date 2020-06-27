@@ -1,7 +1,6 @@
 package com.stakkato95.service.drone.domain.drone;
 
 import com.stakkato95.service.drone.model.drone.Position;
-import com.stakkato95.service.drone.model.telemetry.GNSS;
 import com.stakkato95.service.drone.model.drone.Drone;
 import com.stakkato95.service.drone.model.drone.UnregisteredDrone;
 import org.springframework.data.mongodb.core.MongoTemplate;
