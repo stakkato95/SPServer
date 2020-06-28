@@ -1,5 +1,6 @@
 package com.stakkato95.service.drone.socket;
 
+import com.stakkato95.service.drone.domain.session.SessionRepository;
 import com.stakkato95.service.drone.model.action.ActionType;
 import com.stakkato95.service.drone.domain.action.ActionRepository;
 import com.stakkato95.service.drone.domain.drone.DroneRepository;
@@ -23,17 +24,20 @@ public class DroneConnection implements SocketConnectionResponder {
     private final DroneSocketHandler socketHandler;
     private final DroneRepository droneRepo;
     private final ActionRepository actionRepo;
+    private final SessionRepository sessionRepo;
 
     private List<WebSocketSession> sessions = new ArrayList<>();
 
     public DroneConnection(DroneSocketHandler socketHandler,
                            DroneRepository droneRepo,
-                           ActionRepository actionRepo) {
+                           ActionRepository actionRepo,
+                           SessionRepository sessionRepo) {
         this.socketHandler = socketHandler;
         this.socketHandler.setResponder(this);
 
         this.droneRepo = droneRepo;
         this.actionRepo = actionRepo;
+        this.sessionRepo = sessionRepo;
 
         this.socketHandler.getEstablishedCon().subscribe(this::onSocketSessionStarted);
         this.socketHandler.getClosedCon().subscribe(this::onSocketSessionFinished);
@@ -67,7 +71,7 @@ public class DroneConnection implements SocketConnectionResponder {
 
     @Override
     public void onStartSessionAck(StartSessionAck sessionAck) {
-        LOGGER.info("StartSessionAck %b", sessionAck.successful);
+        sessionRepo.acknowledgeSessionStart(sessionAck.sessionId);
     }
 
     @Override
@@ -108,6 +112,12 @@ public class DroneConnection implements SocketConnectionResponder {
         StartSession startSession = new StartSession();
         startSession.sessionId = sessionId;
         send(ip, startSession, MessageType.START_SESSION);
+    }
+
+    public void sendStopSession(String ip, String sessionId) {
+        StopSession stopSession = new StopSession();
+        stopSession.sessionId = sessionId;
+        send(ip, stopSession, MessageType.STOP_SESSION);
     }
 
     private <T> void send(String ip, T payload, MessageType messageType) {

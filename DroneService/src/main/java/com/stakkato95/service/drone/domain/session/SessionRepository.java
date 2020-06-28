@@ -48,17 +48,43 @@ public class SessionRepository {
         session.flightState = FlightState.LANDED;
         session.sessionStartTime = new Date();
         session.sessionState = SessionState.RUNNING;
+        session.sessionStartAcknowledged = false;
+        session.sessionStopAcknowledged = false;
         return mongo.save(session);
     }
 
     public Session stopSession(String sessionId) {
-        Session session = mongo.findById(sessionId, Session.class);
+        Session session = getSessionById(sessionId);
         if (session == null) {
             return null;
         }
 
         session.sessionState = SessionState.FINISHED;
         session.sessionEndTime = new Date();
+        return mongo.save(session);
+    }
+
+    public Session getSessionById(String id) {
+        return mongo.findById(id, Session.class);
+    }
+
+    public Session acknowledgeSessionStart(String sessionId) {
+        Session session = getSessionById(sessionId);
+        if (session == null) {
+            return null;
+        }
+
+        session.sessionStartAcknowledged = true;
+        return mongo.save(session);
+    }
+
+    public Session acknowledgeSessionStop(String sessionId) {
+        Session session = getSessionById(sessionId);
+        if (session == null) {
+            return null;
+        }
+
+        session.sessionStopAcknowledged = true;
         return mongo.save(session);
     }
 }

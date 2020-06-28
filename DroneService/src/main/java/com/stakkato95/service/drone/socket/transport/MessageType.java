@@ -17,5 +17,6 @@ public enum MessageType {
     START_ACTION_ACK, //TODO future release
     ACTION_FINISHED,
 
-    STOP_SESSION
+    STOP_SESSION,
+    STOP_SESSION_ACK
 }

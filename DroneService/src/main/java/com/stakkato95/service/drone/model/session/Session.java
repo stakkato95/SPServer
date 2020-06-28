@@ -14,4 +14,6 @@ public class Session {
     public Date sessionEndTime;
     public FlightState flightState;
     public SessionState sessionState;
+    public boolean sessionStartAcknowledged;
+    public boolean sessionStopAcknowledged;
 }

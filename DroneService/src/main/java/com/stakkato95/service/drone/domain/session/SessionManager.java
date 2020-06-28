@@ -79,7 +79,15 @@ public class SessionManager {
     }
 
     public Session stopSession(String sessionId) {
-        return sessionRepo.stopSession(sessionId);
+        Session session = sessionRepo.stopSession(sessionId);
+        if (session == null) {
+            return null;
+        }
+
+        Drone drone = droneRepo.getDroneById(session.droneId);
+        droneConnection.sendStopSession(drone.ip, sessionId);
+
+        return session;
     }
 
     public Action sendAction(String sessionId, ActionType actionType, float value) {
