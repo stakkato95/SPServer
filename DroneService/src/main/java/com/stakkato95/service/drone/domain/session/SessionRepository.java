@@ -68,23 +68,23 @@ public class SessionRepository {
         return mongo.findById(id, Session.class);
     }
 
-    public Session acknowledgeSessionStart(String sessionId) {
+    public void acknowledgeSessionStart(String sessionId) {
         Session session = getSessionById(sessionId);
         if (session == null) {
-            return null;
+            return;
         }
 
         session.sessionStartAcknowledged = true;
-        return mongo.save(session);
+        mongo.save(session);
     }
 
-    public Session acknowledgeSessionStop(String sessionId) {
+    public void acknowledgeSessionStop(String sessionId) {
         Session session = getSessionById(sessionId);
         if (session == null) {
-            return null;
+            return;
         }
 
         session.sessionStopAcknowledged = true;
-        return mongo.save(session);
+        mongo.save(session);
     }
 }

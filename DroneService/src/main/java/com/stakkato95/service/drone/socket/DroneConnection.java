@@ -75,6 +75,11 @@ public class DroneConnection implements SocketConnectionResponder {
     }
 
     @Override
+    public void onStopSessionAck(StopSessionAck ack) {
+        sessionRepo.acknowledgeSessionStop(ack.sessionId);
+    }
+
+    @Override
     public void onPingAck(PingAck pingAck) {
         droneRepo.updateLastSeenTime(pingAck.droneId, pingAck.timestamp);
     }
