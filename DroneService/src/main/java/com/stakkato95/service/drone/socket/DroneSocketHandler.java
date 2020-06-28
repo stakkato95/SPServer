@@ -5,10 +5,7 @@ import com.stakkato95.service.drone.helper.PublishSubject;
 import com.stakkato95.service.drone.socket.transport.Message;
 import com.stakkato95.service.drone.socket.transport.MessageTemp;
 import com.stakkato95.service.drone.socket.transport.MessageType;
-import com.stakkato95.service.drone.socket.transport.model.response.ActionFinished;
-import com.stakkato95.service.drone.socket.transport.model.response.ShowUp;
-import com.stakkato95.service.drone.socket.transport.model.response.PingAck;
-import com.stakkato95.service.drone.socket.transport.model.response.StartSessionAck;
+import com.stakkato95.service.drone.socket.transport.model.response.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.CloseStatus;
@@ -89,6 +86,7 @@ public class DroneSocketHandler extends TextWebSocketHandler {
         handlers.put(MessageType.START_SESSION_ACK, (s, p) -> callResponder(p, responder::onStartSessionAck, StartSessionAck.class));
         handlers.put(MessageType.PING_ACK, (s, p) -> callResponder(p, responder::onPingAck, PingAck.class));
         handlers.put(MessageType.ACTION_FINISHED, (s, p) -> callResponder(p, responder::onActionFinished, ActionFinished.class));
+        handlers.put(MessageType.REGISTRATION_ACK, (s, p) -> callResponder(p, responder::onRegistrationAck, RegistrationAck.class));
     }
 
     private <T> void callResponder(String payload, Consumer<T> responderMethod, Class<T> contentClass) throws Exception {

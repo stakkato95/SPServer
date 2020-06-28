@@ -15,4 +15,5 @@ public class Drone {
     public Date registrationTime;
     public Date lastConnectionTime;
     public Date lastSeenTime;
+    public boolean registrationConfirmed;
 }

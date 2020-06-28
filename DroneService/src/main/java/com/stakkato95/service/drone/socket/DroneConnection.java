@@ -6,10 +6,7 @@ import com.stakkato95.service.drone.domain.drone.DroneRepository;
 import com.stakkato95.service.drone.model.drone.UnregisteredDrone;
 import com.stakkato95.service.drone.socket.transport.MessageType;
 import com.stakkato95.service.drone.socket.transport.model.request.*;
-import com.stakkato95.service.drone.socket.transport.model.response.ActionFinished;
-import com.stakkato95.service.drone.socket.transport.model.response.ShowUp;
-import com.stakkato95.service.drone.socket.transport.model.response.PingAck;
-import com.stakkato95.service.drone.socket.transport.model.response.StartSessionAck;
+import com.stakkato95.service.drone.socket.transport.model.response.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.WebSocketSession;
@@ -61,6 +58,11 @@ public class DroneConnection implements SocketConnectionResponder {
         ShowUpAck ack = new ShowUpAck();
         ack.tempId = unregisteredDrone.id;
         send(showUp.ip, ack, MessageType.SHOW_UP_ACK);
+    }
+
+    @Override
+    public void onRegistrationAck(RegistrationAck registrationAck) {
+        droneRepo.confirmDroneRegistration(registrationAck.droneId);
     }
 
     @Override

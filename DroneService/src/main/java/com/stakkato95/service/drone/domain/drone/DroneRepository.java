@@ -70,10 +70,21 @@ public class DroneRepository {
         drone.registrationTime = registrationTime;
         drone.lastSeenTime = registrationTime;
         drone.lastConnectionTime = showUpTime;
+        drone.registrationConfirmed = false;
         return mongo.save(drone);
     }
 
     public void removeUnregisteredDrone(String id) {
         mongo.remove(Query.query(Criteria.where("id").is(id)), UnregisteredDrone.class);
+    }
+
+    public void confirmDroneRegistration(String droneId) {
+        Drone drone = getDroneById(droneId);
+        if (drone == null) {
+            return;
+        }
+
+        drone.registrationConfirmed = true;
+        mongo.save(drone);
     }
 }
