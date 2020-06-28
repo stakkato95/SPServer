@@ -6,7 +6,6 @@ import com.stakkato95.service.drone.model.action.Action;
 import com.stakkato95.service.drone.model.action.ActionType;
 import com.stakkato95.service.drone.model.drone.Drone;
 import com.stakkato95.service.drone.model.session.Session;
-import com.stakkato95.service.drone.model.session.SessionState;
 import com.stakkato95.service.drone.socket.DroneConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,16 +1,12 @@
 package com.stakkato95.service.drone.domain.drone;
 
-import com.stakkato95.service.drone.helper.BsonHelper;
 import com.stakkato95.service.drone.helper.CommonHelper;
-import com.stakkato95.service.drone.helper.Const;
 import com.stakkato95.service.drone.helper.DatabaseUpdate;
 import com.stakkato95.service.drone.model.drone.Drone;
 import com.stakkato95.service.drone.model.drone.UnregisteredDrone;
 import com.stakkato95.service.drone.domain.RestResponse;
 import com.stakkato95.service.drone.domain.drone.model.RegistrationRequest;
-import com.stakkato95.service.drone.model.session.Session;
 import com.stakkato95.service.drone.socket.DroneConnection;
-import org.springframework.data.mongodb.core.ChangeStreamOptions;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
