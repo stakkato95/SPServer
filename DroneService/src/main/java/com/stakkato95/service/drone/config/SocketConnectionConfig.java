@@ -9,7 +9,6 @@ import com.stakkato95.service.drone.socket.DroneConnection;
 import com.stakkato95.service.drone.socket.DroneSocketHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.core.MongoTemplate;
 
 @Configuration
 public class SocketConnectionConfig {
@@ -22,8 +21,9 @@ public class SocketConnectionConfig {
     @Bean
     public DroneConnection getDroneConnection(DroneSocketHandler handler,
                                               DroneRepository droneRepo,
-                                              ActionRepository actionRepo) {
-        return new DroneConnection(handler, droneRepo, actionRepo);
+                                              ActionRepository actionRepo,
+                                              SessionRepository sessionRepo) {
+        return new DroneConnection(handler, droneRepo, actionRepo, sessionRepo);
     }
 
     @Bean

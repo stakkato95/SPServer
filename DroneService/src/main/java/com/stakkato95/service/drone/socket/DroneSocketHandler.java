@@ -87,7 +87,7 @@ public class DroneSocketHandler extends TextWebSocketHandler {
         handlers.put(MessageType.PING_ACK, (s, p) -> callResponder(p, responder::onPingAck, PingAck.class));
         handlers.put(MessageType.ACTION_FINISHED, (s, p) -> callResponder(p, responder::onActionFinished, ActionFinished.class));
         handlers.put(MessageType.REGISTRATION_ACK, (s, p) -> callResponder(p, responder::onRegistrationAck, RegistrationAck.class));
-        handlers.put(MessageType.STOP_SESSION_ACK, (s, p) -> callResponder(p, responder::onRegistrationAck, RegistrationAck.class));
+        handlers.put(MessageType.STOP_SESSION_ACK, (s, p) -> callResponder(p, responder::onStopSessionAck, StopSessionAck.class));
     }
 
     private <T> void callResponder(String payload, Consumer<T> responderMethod, Class<T> contentClass) throws Exception {
