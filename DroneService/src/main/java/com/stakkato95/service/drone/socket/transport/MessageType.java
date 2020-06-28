@@ -2,7 +2,10 @@ package com.stakkato95.service.drone.socket.transport;
 
 public enum MessageType {
     SHOW_UP,
+    SHOW_UP_ACK,
+
     REGISTRATION,
+    REGISTRATION_ACK,
 
     START_SESSION,
     START_SESSION_ACK,

@@ -3,11 +3,9 @@ package com.stakkato95.service.drone.socket;
 import com.stakkato95.service.drone.model.action.ActionType;
 import com.stakkato95.service.drone.domain.action.ActionRepository;
 import com.stakkato95.service.drone.domain.drone.DroneRepository;
+import com.stakkato95.service.drone.model.drone.UnregisteredDrone;
 import com.stakkato95.service.drone.socket.transport.MessageType;
-import com.stakkato95.service.drone.socket.transport.model.request.Registration;
-import com.stakkato95.service.drone.socket.transport.model.request.StartAction;
-import com.stakkato95.service.drone.socket.transport.model.request.Ping;
-import com.stakkato95.service.drone.socket.transport.model.request.StartSession;
+import com.stakkato95.service.drone.socket.transport.model.request.*;
 import com.stakkato95.service.drone.socket.transport.model.response.ActionFinished;
 import com.stakkato95.service.drone.socket.transport.model.response.ShowUp;
 import com.stakkato95.service.drone.socket.transport.model.response.PingAck;
@@ -58,7 +56,11 @@ public class DroneConnection implements SocketConnectionResponder {
 
     @Override
     public void onShowUp(ShowUp showUp) {
-        droneRepo.createUnregisteredDrone(showUp.ip, showUp.position);
+        UnregisteredDrone unregisteredDrone = droneRepo.createUnregisteredDrone(showUp.ip, showUp.position);
+
+        ShowUpAck ack = new ShowUpAck();
+        ack.tempId = unregisteredDrone.id;
+        send(showUp.ip, ack, MessageType.SHOW_UP_ACK);
     }
 
     @Override

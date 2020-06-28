@@ -22,22 +22,27 @@ public class DroneRepository {
         return mongo.findById(id, Drone.class);
     }
 
-    public void createUnregisteredDrone(String ip, Position position) {
+    public UnregisteredDrone createUnregisteredDrone(String ip, Position position) {
         UnregisteredDrone info = new UnregisteredDrone();
         info.ip = ip;
         info.position = position;
         info.showUpTime = new Date();
-        mongo.save(info);
+        return mongo.save(info);
     }
 
-    public void updateLastSeenTime(String droneId, Date lastSeenTime) {
-        Drone drone = mongo.findById(droneId, Drone.class);
-        if (drone == null) {
+    public void updateLastSeenTime(String id, Date lastSeenTime) {
+        Drone drone = getDroneById(id);
+        if (drone != null) {
+            drone.lastSeenTime = lastSeenTime;
+            mongo.save(drone);
             return;
         }
 
-        drone.lastSeenTime = lastSeenTime;
-        mongo.save(drone);
+        UnregisteredDrone unregisteredDrone = mongo.findById(id, UnregisteredDrone.class);
+        if (unregisteredDrone != null) {
+            unregisteredDrone.lastSeenTime = lastSeenTime;
+            mongo.save(unregisteredDrone);
+        }
     }
 
     public Drone getDroneByIp(String ip) {

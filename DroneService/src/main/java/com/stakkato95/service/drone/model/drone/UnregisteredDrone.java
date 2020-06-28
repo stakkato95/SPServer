@@ -12,4 +12,5 @@ public class UnregisteredDrone {
     public String ip;
     public Position position;
     public Date showUpTime;
+    public Date lastSeenTime;
 }
