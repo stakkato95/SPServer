@@ -50,4 +50,15 @@ public class SessionRepository {
         session.sessionState = SessionState.RUNNING;
         return mongo.save(session);
     }
+
+    public Session stopSession(String sessionId) {
+        Session session = mongo.findById(sessionId, Session.class);
+        if (session == null) {
+            return null;
+        }
+
+        session.sessionState = SessionState.FINISHED;
+        session.sessionEndTime = new Date();
+        return mongo.save(session);
+    }
 }

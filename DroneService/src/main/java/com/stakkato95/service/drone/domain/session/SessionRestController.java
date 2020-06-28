@@ -57,24 +57,14 @@ public class SessionRestController {
 
     @PostMapping(value = "/stopSession", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public RestResponse<Session> stopSession(@RequestBody StopSessionRequest req) throws InterruptedException {
-        Session session = mongoTemplate.findById(req.sessionId, Session.class);
+        Session session = sessionManager.stopSession(req.sessionId);
 
         RestResponse<Session> response = new RestResponse<>();
-
         if (session == null) {
             response.successful = false;
             response.message = String.format("no session with id '%s' found", req.sessionId);
             return response;
         }
-        if (session.sessionState == SessionState.FINISHED) {
-            response.successful = false;
-            response.message = String.format("session with id '%s' is already finished", req.sessionId);
-            return response;
-        }
-
-        session.sessionState = SessionState.FINISHED;
-        session.sessionEndTime = new Date();
-        mongoTemplate.save(session);
 
         response.successful = true;
         response.payload = session;

@@ -6,6 +6,7 @@ import com.stakkato95.service.drone.model.action.Action;
 import com.stakkato95.service.drone.model.action.ActionType;
 import com.stakkato95.service.drone.model.drone.Drone;
 import com.stakkato95.service.drone.model.session.Session;
+import com.stakkato95.service.drone.model.session.SessionState;
 import com.stakkato95.service.drone.socket.DroneConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,6 +76,10 @@ public class SessionManager {
         droneConnection.sendStartSession(drone.ip, session.id);
         sessionIdToDroneIp.put(session.id, drone.ip);
         return session;
+    }
+
+    public Session stopSession(String sessionId) {
+        return sessionRepo.stopSession(sessionId);
     }
 
     public Action sendAction(String sessionId, ActionType actionType, float value) {
