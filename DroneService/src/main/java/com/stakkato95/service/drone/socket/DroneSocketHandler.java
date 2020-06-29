@@ -52,7 +52,9 @@ public class DroneSocketHandler extends TextWebSocketHandler {
         message.payload = payload;
 
         String json = objectMapper.writeValueAsString(message);
-        session.sendMessage(new TextMessage(json));
+        synchronized (DroneSocketHandler.class) {
+            session.sendMessage(new TextMessage(json));
+        }
     }
 
     @Override
