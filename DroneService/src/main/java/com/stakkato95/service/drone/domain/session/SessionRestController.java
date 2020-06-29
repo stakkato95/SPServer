@@ -1,14 +1,13 @@
 package com.stakkato95.service.drone.domain.session;
 
+import com.stakkato95.service.drone.domain.session.model.History;
 import com.stakkato95.service.drone.helper.CommonHelper;
 import com.stakkato95.service.drone.helper.DatabaseUpdate;
 import com.stakkato95.service.drone.model.session.Session;
-import com.stakkato95.service.drone.model.session.SessionState;
 import com.stakkato95.service.drone.domain.RestResponse;
 import com.stakkato95.service.drone.domain.session.model.request.SessionRequest;
 import com.stakkato95.service.drone.domain.session.model.request.StartSessionRequest;
 import com.stakkato95.service.drone.domain.session.model.request.StopSessionRequest;
-import com.stakkato95.service.drone.domain.session.model.response.SessionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -19,7 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
-import java.util.Date;
+import java.util.List;
 
 @CrossOrigin
 @RestController
@@ -32,17 +31,17 @@ public class SessionRestController {
 
     private final MongoTemplate mongoTemplate;
     private final ReactiveMongoTemplate reactiveMongo;
-    private final SessionRepository sessionRepo;
     private final SessionManager sessionManager;
+    private final HistoryRepository historyRepo;
 
     public SessionRestController(MongoTemplate mongoTemplate,
                                  ReactiveMongoTemplate reactiveMongo,
                                  SessionManager sessionManager,
-                                 SessionRepository sessionRepo) {
+                                 HistoryRepository historyRepo) {
         this.mongoTemplate = mongoTemplate;
         this.reactiveMongo = reactiveMongo;
         this.sessionManager = sessionManager;
-        this.sessionRepo = sessionRepo;
+        this.historyRepo = historyRepo;
     }
 
     @PostMapping(value = "/startSession", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -113,5 +112,10 @@ public class SessionRestController {
     @GetMapping(value = "/getUpdates", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<DatabaseUpdate<Session>> getUpdates() {
         return CommonHelper.getChangeStream(reactiveMongo, COLLECTION, Session.class);
+    }
+
+    @GetMapping(value = "/getHistory", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<History> getHistory() {
+        return historyRepo.getAllHistory();
     }
 }

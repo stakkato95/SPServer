@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.Date;
+import java.util.List;
 
 public class SessionRepository {
 
@@ -86,5 +87,9 @@ public class SessionRepository {
 
         session.sessionStopAcknowledged = true;
         mongo.save(session);
+    }
+
+    public List<Session> getAllSessions() {
+        return mongo.findAll(Session.class);
     }
 }

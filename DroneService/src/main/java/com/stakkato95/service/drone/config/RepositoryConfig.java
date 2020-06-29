@@ -2,6 +2,7 @@ package com.stakkato95.service.drone.config;
 
 import com.stakkato95.service.drone.domain.action.ActionRepository;
 import com.stakkato95.service.drone.domain.drone.DroneRepository;
+import com.stakkato95.service.drone.domain.session.HistoryRepository;
 import com.stakkato95.service.drone.domain.session.SessionRepository;
 import com.stakkato95.service.drone.domain.telemetry.TelemetryRepository;
 import org.springframework.context.annotation.Bean;
@@ -28,5 +29,12 @@ public class RepositoryConfig {
     @Bean
     public TelemetryRepository getTelemetryRepo(MongoTemplate template) {
         return new TelemetryRepository(template);
+    }
+
+    @Bean
+    public HistoryRepository getHistoryRepo(SessionRepository sessionRepo,
+                                              DroneRepository droneRepo,
+                                              ActionRepository actionRepo) {
+        return new HistoryRepository(sessionRepo, droneRepo, actionRepo);
     }
 }

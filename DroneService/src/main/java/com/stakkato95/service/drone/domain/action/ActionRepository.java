@@ -46,4 +46,8 @@ public class ActionRepository {
             mongo.save(action);
         }
     }
+
+    public List<Action> getAllActions(String sessionId) {
+        return mongo.find(Query.query(Criteria.where("sessionId").is(sessionId)), Action.class);
+    }
 }
